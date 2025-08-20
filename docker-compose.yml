@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    environment:
+      POSTGRES_USER: worldmap_user
+      POSTGRES_PASSWORD: worldmap_pass
+      POSTGRES_DB: worldmap_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - worldmap_network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - worldmap_network
+
+  adminer:
+    image: adminer:4.8.1
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    networks:
+      - worldmap_network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  worldmap_network:
+    driver: bridge

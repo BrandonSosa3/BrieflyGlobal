@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Map, { ViewState } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -16,15 +16,81 @@ const RealWorldMap: React.FC<RealWorldMapProps> = ({ onCountryClick, selectedCou
     pitch: 0,
     padding: { top: 0, bottom: 0, left: 0, right: 0 }
   });
+  
+  const [availableCountries, setAvailableCountries] = useState<Array<{code: string, name: string, coords: [number, number]}>>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Our supported countries with their coordinates for centering
-  const countries = [
-    { code: 'USA', name: 'United States', coords: [-95.7129, 37.0902] as [number, number] },
-    { code: 'GBR', name: 'United Kingdom', coords: [-3.4360, 55.3781] as [number, number] },
-    { code: 'JPN', name: 'Japan', coords: [138.2529, 36.2048] as [number, number] },
-    { code: 'DEU', name: 'Germany', coords: [10.4515, 51.1657] as [number, number] },
-    { code: 'CHN', name: 'China', coords: [104.1954, 35.8617] as [number, number] }
-  ];
+  // Fetch available countries from backend
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        console.log('🔍 Fetching countries from backend...');
+        
+        // Add a small delay and retry logic
+        let retries = 3;
+        let lastError;
+        
+        for (let i = 0; i < retries; i++) {
+          try {
+            const response = await fetch('http://localhost:8000/api/v1/news/countries', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              console.log('✅ Countries data:', data);
+              
+              const countries = data.countries || data;
+              setAvailableCountries(countries.map((country: any) => ({
+                code: country.code,
+                name: country.name,
+                coords: country.coords as [number, number]
+              })));
+              console.log(`✅ Loaded ${countries.length} countries`);
+              setError(null); // Clear any previous errors
+              return; // Success, exit the retry loop
+            } else {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+          } catch (err) {
+            lastError = err;
+            console.log(`❌ Attempt ${i + 1} failed:`, err);
+            
+            if (i < retries - 1) {
+              console.log(`⏳ Retrying in ${(i + 1) * 1000}ms...`);
+              await new Promise(resolve => setTimeout(resolve, (i + 1) * 1000));
+            }
+          }
+        }
+        
+        // All retries failed
+        throw lastError;
+        
+      } catch (error) {
+        console.error('❌ All attempts failed to fetch countries:', error);
+        setError(error instanceof Error ? error.message : 'Connection failed');
+        
+        // Fallback to original 5 countries
+        setAvailableCountries([
+          { code: 'USA', name: 'United States', coords: [-95.7129, 37.0902] },
+          { code: 'GBR', name: 'United Kingdom', coords: [-3.4360, 55.3781] },
+          { code: 'JPN', name: 'Japan', coords: [138.2529, 36.2048] },
+          { code: 'DEU', name: 'Germany', coords: [10.4515, 51.1657] },
+          { code: 'CHN', name: 'China', coords: [104.1954, 35.8617] }
+        ]);
+        console.log('🔄 Using fallback countries');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Add a small delay before starting to give backend time to start
+    setTimeout(fetchCountries, 1000);
+  }, []);
 
   const handleMapMove = useCallback((evt: { viewState: ViewState }) => {
     setViewState(evt.viewState);
@@ -35,7 +101,7 @@ const RealWorldMap: React.FC<RealWorldMapProps> = ({ onCountryClick, selectedCou
     onCountryClick(countryCode);
     
     // Zoom to country
-    const country = countries.find(c => c.code === countryCode);
+    const country = availableCountries.find(c => c.code === countryCode);
     if (country) {
       setViewState({
         ...viewState,
@@ -48,26 +114,101 @@ const RealWorldMap: React.FC<RealWorldMapProps> = ({ onCountryClick, selectedCou
 
   const handleMapClick = useCallback((event: any) => {
     console.log('🗺️ Map clicked at:', event.lngLat);
-    // For now, we'll detect clicks and map them to our supported countries
-    // In a real app, you'd use country boundary data
     
     const { lng, lat } = event.lngLat;
     
-    // Simple region detection (rough approximations)
-    if (lng >= -130 && lng <= -60 && lat >= 25 && lat <= 50) {
-      handleCountryClick('USA');
-    } else if (lng >= -10 && lng <= 5 && lat >= 50 && lat <= 60) {
-      handleCountryClick('GBR');
-    } else if (lng >= 5 && lng <= 15 && lat >= 47 && lat <= 55) {
-      handleCountryClick('DEU');
-    } else if (lng >= 130 && lng <= 145 && lat >= 30 && lat <= 45) {
-      handleCountryClick('JPN');
-    } else if (lng >= 70 && lng <= 140 && lat >= 15 && lat <= 50) {
-      handleCountryClick('CHN');
-    } else {
-      console.log('🗺️ Clicked area not supported yet');
+    // Find the closest country to the clicked coordinates
+    let closestCountry = null;
+    let shortestDistance = Infinity;
+    
+    for (const country of availableCountries) {
+      const [countryLng, countryLat] = country.coords;
+      
+      // Calculate distance using Haversine-like formula (simplified)
+      const dlat = lat - countryLat;
+      const dlng = lng - countryLng;
+      const distance = Math.sqrt(dlat * dlat + dlng * dlng);
+      
+      // Define different thresholds for different regions to account for country sizes
+      let threshold = 10; // Default threshold
+      
+      // Larger thresholds for larger countries
+      if (country.code === 'RUS' || country.code === 'CAN' || country.code === 'USA' || country.code === 'CHN' || country.code === 'BRA' || country.code === 'AUS') {
+        threshold = 25; // Larger countries
+      } else if (country.code === 'IND' || country.code === 'ARG' || country.code === 'KAZ' || country.code === 'DZA' || country.code === 'SAU') {
+        threshold = 20; // Medium-large countries
+      } else if (['SGP', 'BHR', 'MLT', 'MUS', 'MDV'].includes(country.code)) {
+        threshold = 5; // Very small countries/city-states
+      }
+      
+      if (distance < threshold && distance < shortestDistance) {
+        shortestDistance = distance;
+        closestCountry = country;
+      }
     }
-  }, [viewState]);
+    
+    if (closestCountry) {
+      console.log(`🎯 Country detected: ${closestCountry.name} (${closestCountry.code}) - Distance: ${shortestDistance.toFixed(2)}`);
+      handleCountryClick(closestCountry.code);
+    } else {
+      console.log(`🗺️ No country found near coordinates [${lng.toFixed(2)}, ${lat.toFixed(2)}]. Available countries: ${availableCountries.length}`);
+      
+      // Show the closest 3 countries for debugging
+      const sorted = availableCountries
+        .map(country => {
+          const [countryLng, countryLat] = country.coords;
+          const dlat = lat - countryLat;
+          const dlng = lng - countryLng;
+          const distance = Math.sqrt(dlat * dlat + dlng * dlng);
+          return { ...country, distance };
+        })
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 3);
+      
+      console.log('🔍 Closest countries:', sorted.map(c => `${c.name} (${c.distance.toFixed(2)})`));
+    }
+  }, [availableCountries, handleCountryClick]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div style={{ 
+        height: '400px', 
+        width: '100%', 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(255,255,255,0.1)',
+        borderRadius: '10px'
+      }}>
+        <div style={{ color: 'white', fontSize: '16px' }}>
+          🔄 Loading countries...
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div style={{ 
+        height: '400px', 
+        width: '100%', 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(255,0,0,0.1)',
+        borderRadius: '10px',
+        border: '1px solid rgba(255,0,0,0.3)'
+      }}>
+        <div style={{ color: 'white', fontSize: '14px', textAlign: 'center', padding: '20px' }}>
+          ❌ Error loading countries: {error}
+          <br />
+          <small>Using fallback countries</small>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ 
@@ -87,7 +228,7 @@ const RealWorldMap: React.FC<RealWorldMapProps> = ({ onCountryClick, selectedCou
         cursor="pointer"
       />
       
-      {/* Country buttons overlay for easy access */}
+      {/* Country buttons overlay */}
       <div style={{
         position: 'absolute',
         bottom: '10px',
@@ -95,30 +236,44 @@ const RealWorldMap: React.FC<RealWorldMapProps> = ({ onCountryClick, selectedCou
         display: 'flex',
         gap: '5px',
         flexWrap: 'wrap',
-        zIndex: 1000
+        zIndex: 1000,
+        maxWidth: 'calc(100% - 20px)'
       }}>
-        {countries.map(country => (
+        {availableCountries.slice(0, 12).map(country => (
           <button
             key={country.code}
             onClick={() => handleCountryClick(country.code)}
             style={{
-              padding: '6px 10px',
-              fontSize: '11px',
+              padding: '4px 8px',
+              fontSize: '10px',
               backgroundColor: selectedCountry === country.code ? '#f59e0b' : 'rgba(255,255,255,0.9)',
               color: selectedCountry === country.code ? 'white' : '#333',
               border: selectedCountry === country.code ? '2px solid #fbbf24' : '1px solid #ccc',
-              borderRadius: '12px',
+              borderRadius: '8px',
               cursor: 'pointer',
               fontWeight: 'bold',
               boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
             }}
+            title={country.name}
           >
             {country.code}
           </button>
         ))}
+        
+        <div style={{
+          padding: '4px 8px',
+          fontSize: '10px',
+          backgroundColor: 'rgba(59, 130, 246, 0.9)',
+          color: 'white',
+          borderRadius: '8px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+        }}>
+          {availableCountries.length} total
+        </div>
       </div>
 
-      {/* Map controls info */}
+      {/* Map info */}
       <div style={{
         position: 'absolute',
         top: '10px',
@@ -130,7 +285,7 @@ const RealWorldMap: React.FC<RealWorldMapProps> = ({ onCountryClick, selectedCou
         fontSize: '12px',
         zIndex: 1000
       }}>
-        🌍 Drag to explore • Click regions for news
+        🌍 Click anywhere on map - {availableCountries.length} countries available
       </div>
 
       {/* Selected country indicator */}
@@ -147,7 +302,7 @@ const RealWorldMap: React.FC<RealWorldMapProps> = ({ onCountryClick, selectedCou
           fontWeight: 'bold',
           zIndex: 1000
         }}>
-          📍 {countries.find(c => c.code === selectedCountry)?.name}
+          📍 {availableCountries.find(c => c.code === selectedCountry)?.name || selectedCountry}
         </div>
       )}
     </div>

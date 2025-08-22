@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import JSONResponse
 from app.api.v1 import api_router
 from app.core.config import settings
 
@@ -12,23 +14,37 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Add middleware
+# CORS - Allow everything for now
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",           # Local development
-        "http://127.0.0.1:3000",
-        "https://briefly-global.vercel.app",  # Your production Vercel URL
-        "https://*.vercel.app",            # All Vercel deployments (previews)
-        # Temporary for debugging:
-        "*",                               # Remove this after testing
-    ],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Manual CORS handling for extra safety
+@app.middleware("http")
+async def cors_middleware(request: Request, call_next):
+    # Handle preflight requests
+    if request.method == "OPTIONS":
+        response = JSONResponse(content="OK")
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
+    
+    # Process the request
+    response = await call_next(request)
+    
+    # Add CORS headers to all responses
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
 
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
@@ -39,13 +55,13 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    return {"status": "healthy", "cors": "enabled"}
 
-# Additional endpoint for frontend to test connection
 @app.get("/api/v1/ping")
 async def ping():
     return {
         "message": "Backend is connected!",
         "status": "success",
-        "timestamp": "2025-08-20T15:30:00Z"
+        "cors": "working"
     }
+

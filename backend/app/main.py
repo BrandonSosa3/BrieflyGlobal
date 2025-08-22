@@ -18,13 +18,13 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",           # Local development
         "http://127.0.0.1:3000",
-        "https://*.vercel.app",            # All Vercel deployments (preview & production)
-        "https://brieflyglobal.vercel.app", # Your specific Vercel URL (update if different)
-        # Add your custom domain here if you get one later:
-        # "https://brieflyglobal.com",
+        "https://briefly-global.vercel.app",  # Your production Vercel URL
+        "https://*.vercel.app",            # All Vercel deployments (previews)
+        # Temporary for debugging:
+        "*",                               # Remove this after testing
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # More explicit method list
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 

@@ -1,4 +1,19 @@
+version: '3.9'
+
 services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://worldmap_user:worldmap_pass@postgres:5432/worldmap_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
   postgres:
     image: pgvector/pgvector:pg15
     environment:
@@ -10,8 +25,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init:/docker-entrypoint-initdb.d
-    networks:
-      - worldmap_network
 
   redis:
     image: redis:7-alpine
@@ -19,24 +32,8 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    networks:
-      - worldmap_network
-
-  adminer:
-    image: adminer:4.8.1
-    ports:
-      - "8080:8080"
-    environment:
-      ADMINER_DEFAULT_SERVER: postgres
-    networks:
-      - worldmap_network
-    depends_on:
-      - postgres
 
 volumes:
   postgres_data:
   redis_data:
 
-networks:
-  worldmap_network:
-    driver: bridge

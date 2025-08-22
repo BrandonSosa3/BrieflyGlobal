@@ -1,8 +1,35 @@
 services:
+  # Database service (if created via Render)
+  - type: pgsql
+    name: brieflyglobal-db
+    plan: free
+    databaseName: brieflyglobal
+    databaseUser: brieflyglobal_user
+
+  # Web service
   - type: web
-    name: BrieflyGlobal
+    name: brieflyglobal-api
     env: python
-    pythonVersion: "3.11"
+    region: oregon
+    plan: free
+    branch: main
     rootDir: backend
-    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.8"
+      - key: ENVIRONMENT
+        value: production
+        
+      # Reference internal Render database
+      - key: DATABASE_URL
+        fromDatabase:
+          name: brieflyglobal-db
+          property: connectionString
+          
+      # External services - ADD MANUALLY IN DASHBOARD:
+      # - REDIS_URL (Upstash)
+      # - NEWS_API_KEY
+    
+    healthCheckPath: /api/v1/news/status

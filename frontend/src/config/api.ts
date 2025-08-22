@@ -1,3 +1,4 @@
+
 // src/config/api.ts - Production ready configuration
 
 const getApiUrl = (): string => {
@@ -8,7 +9,6 @@ const getApiUrl = (): string => {
   }
   
   // If deployed (production) - use your actual Render backend URL
-  // Replace 'your-actual-service-name' with your real Render service name
   return 'https://brieflyglobal.onrender.com';
 };
 
@@ -18,7 +18,8 @@ export const API_ENDPOINTS = {
   countries: `${API_BASE_URL}/api/v1/news/countries`,
   countryIntelligence: (code: string) => `${API_BASE_URL}/api/v1/news/${code}`,
   status: `${API_BASE_URL}/api/v1/news/status`,
-  search: (query: string) => `${API_BASE_URL}/api/v1/news/countries/search?q=${query}`
+  search: (query: string) => `${API_BASE_URL}/api/v1/news/countries/search?q=${query}`,
+  ping: `${API_BASE_URL}/api/v1/ping`
 };
 
 export default API_BASE_URL;

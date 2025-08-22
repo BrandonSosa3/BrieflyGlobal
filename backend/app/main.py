@@ -15,9 +15,16 @@ app = FastAPI(
 # Add middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Frontend URL
+    allow_origins=[
+        "http://localhost:3000",           # Local development
+        "http://127.0.0.1:3000",
+        "https://*.vercel.app",            # All Vercel deployments (preview & production)
+        "https://brieflyglobal.vercel.app", # Your specific Vercel URL (update if different)
+        # Add your custom domain here if you get one later:
+        # "https://brieflyglobal.com",
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # More explicit method list
     allow_headers=["*"],
 )
 
@@ -33,3 +40,12 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+# Additional endpoint for frontend to test connection
+@app.get("/api/v1/ping")
+async def ping():
+    return {
+        "message": "Backend is connected!",
+        "status": "success",
+        "timestamp": "2025-08-20T15:30:00Z"
+    }

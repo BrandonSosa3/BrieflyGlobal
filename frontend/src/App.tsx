@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import RealWorldMap from './components/RealWorldMap'
 import CountryDashboard from './components/CountryDashboard'
 import CountryComparison from './components/CountryComparison'
+import { API_ENDPOINTS } from './config/api';
+import API_BASE_URL from './config/api';
 import './App.css'
 
 interface AIAnalysis {
@@ -71,7 +73,7 @@ const App: React.FC = () => {
     const fetchAvailableCountries = async () => {
       try {
         setLoadingCountries(true);
-        const response = await fetch('http://localhost:8000/api/v1/countries');
+        const response = await fetch(API_ENDPOINTS.countries);
         const data = await response.json();
         
         if (response.ok) {
@@ -105,7 +107,7 @@ const App: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/news/${countryCode}`);
+      const response = await fetch(API_ENDPOINTS.countries);
       const data = await response.json();
       
       if (response.ok) {
@@ -137,7 +139,7 @@ const App: React.FC = () => {
   const fetchComparisonData = async (countryCode: string) => {
     setLoadingComparison(true);
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/news/${countryCode}`);
+      const response = await fetch(API_ENDPOINTS.countryIntelligence(countryCode));
       const data = await response.json();
       
       if (response.ok) {
@@ -491,10 +493,9 @@ const App: React.FC = () => {
             onClose={() => setShowComparison(false)}
           />
         )}
-
         <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7 }}>
-          Backend API: <a href="http://localhost:8000/docs" target="_blank" rel="noopener noreferrer">
-            http://localhost:8000/docs
+          Backend API: <a href={`${API_BASE_URL}/docs`} target="_blank" rel="noopener noreferrer">
+            {API_BASE_URL}/docs
           </a> | 
           Countries loaded: {availableCountries.length}
         </p>

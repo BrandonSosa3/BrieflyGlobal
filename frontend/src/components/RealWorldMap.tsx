@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Map, { ViewState } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { API_ENDPOINTS } from '../config/api';
 
 interface RealWorldMapProps {
   onCountryClick: (countryCode: string) => void;
@@ -33,7 +34,7 @@ const RealWorldMap: React.FC<RealWorldMapProps> = ({ onCountryClick, selectedCou
         
         for (let i = 0; i < retries; i++) {
           try {
-            const response = await fetch('http://localhost:8000/api/v1/news/countries', {
+            const response = await fetch(API_ENDPOINTS.countries, {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',

@@ -1,0 +1,15 @@
+venv/
+.env
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Git stuff
+.git
+.gitignore
+
+# OS / IDE files
+.DS_Store
+.vscode
+.idea

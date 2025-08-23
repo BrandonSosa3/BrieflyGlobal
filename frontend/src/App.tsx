@@ -52,6 +52,7 @@ interface Country {
   currency?: string;
 }
 
+
 const App: React.FC = () => {
   const [countryData, setCountryData] = useState<CountryIntelligence | null>(null);
   const [loading, setLoading] = useState(false);
@@ -103,34 +104,55 @@ const App: React.FC = () => {
 
   const fetchCountryData = async (countryCode: string) => {
     console.log('🔍 Fetching comprehensive data for:', countryCode);
+    console.log('🔗 API URL:', API_ENDPOINTS.countryIntelligence(countryCode));
+    
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(API_ENDPOINTS.countries);
-      const data = await response.json();
+      // Make sure we're calling the individual country endpoint, not the countries list
+      const response = await fetch(API_ENDPOINTS.countryIntelligence(countryCode), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+      console.log(`📡 Response URL: ${response.url}`);
       
       if (response.ok) {
-        setCountryData(data);
+        const data = await response.json();
+        console.log('📊 Raw API response:', data);
         
-        // Log data availability
-        if (data.data_availability) {
-          const available = Object.entries(data.data_availability)
-            .filter(([_, available]) => available)
-            .map(([type, _]) => type);
-          console.log(`📊 Available data types: ${available.join(', ')}`);
+        // Check if we got the right data structure
+        if (data.countries) {
+          console.error('❌ Got countries list instead of individual country data!');
+          console.error('This means the wrong endpoint was called.');
+          setError('Wrong API endpoint called - got countries list instead of country data');
+          return;
         }
         
-        // Show message if data is limited
-        if (data.message) {
-          console.log(`ℹ️ ${data.message}`);
+        // Verify we have the correct structure
+        if (data.country && data.country_code) {
+          console.log('✅ Correct country data structure received');
+          console.log('📰 Articles count:', data.articles?.length || 0);
+          console.log('💰 Economic data:', !!data.economic_indicators);
+          console.log('💱 Currency data:', !!data.currency_data);
+          setCountryData(data);
+        } else {
+          console.error('❌ Unexpected data structure:', data);
+          setError('Unexpected data format received from API');
         }
+        
       } else {
-        setError(data.detail || 'Failed to fetch country data');
+        const errorText = await response.text();
+        console.error(`❌ API Error ${response.status}:`, errorText);
+        setError(`API Error: ${response.status} - ${errorText}`);
       }
-    } catch (err) {
-      setError('Failed to connect to backend');
+    } catch (err: any) {
       console.error('❌ Fetch error:', err);
+      setError('Failed to connect to backend');
     } finally {
       setLoading(false);
     }
@@ -193,12 +215,11 @@ const App: React.FC = () => {
   // Get popular countries for comparison dropdown
   const popularCountries = availableCountries.slice(0, 20);
 
-  return (
+  return (    
     <div className="App">
       <header className="App-header">
         <h1>🌍 World Intelligence Platform</h1>
         <p>Comprehensive Country Analysis with Real-Time Data</p>
-        
         {/* Loading Countries State */}
         {loadingCountries && (
           <div style={{ 

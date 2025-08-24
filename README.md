@@ -18,7 +18,7 @@ Professional dashboard design with responsive layouts
 
 Perfect for: Investors, researchers, journalists, policymakers, and anyone interested in global affairs.
 
-✨ Key Features
+Key Features
 🗺️ Interactive World Map
 
 Real MapLibre GL JS integration with professional cartography

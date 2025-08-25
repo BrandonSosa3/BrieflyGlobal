@@ -1,11 +1,5 @@
 .App {
   text-align: center;
-}
-
-.App-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 40px 20px;
-  color: white;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -13,24 +7,40 @@
   justify-content: center;
 }
 
+/* Clean dark header section */
+.App-header {
+  background: var(--bg-dark);
+  padding: 40px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+
+  color: var(--primary);
+  max-width: 800px;
+  margin: 40px auto;
+}
+
 .App-header h1 {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  font-weight: 600;
 }
 
 .App-header h3 {
   margin: 10px 0;
+  font-weight: 500;
+  color: var(--secondary);
 }
 
 .App-header p {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   margin: 10px 0;
+  color: var(--secondary);
 }
 
 .App-header a {
-  color: #61dafb;
+  color: var(--accent);
   text-decoration: none;
+  font-weight: 500;
 }
 
 .App-header a:hover {
@@ -38,10 +48,13 @@
 }
 
 .App-header ul {
-  font-size: 1.1rem;
-  line-height: 1.8;
+  font-size: 1rem;
+  line-height: 1.6;
+  list-style: none;
+  padding: 0;
 }
 
 .App-header li {
   margin: 8px 0;
 }
+

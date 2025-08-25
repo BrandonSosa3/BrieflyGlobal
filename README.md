@@ -6,6 +6,9 @@ Project Overview
 
 BrieflyGlobal aggregates and analyzes global data from multiple sources and presents it through an intuitive, interactive interface. It combines modern frontend and backend technologies with AI-powered analysis to deliver insights into world affairs.
 
+Important Note for Users:
+When using the Vercel live demo, please allow up to 3-7 minutes on the first load. The backend is hosted on Render’s free tier and spins down when idle. Because the backend includes heavy machine learning dependencies, it takes extra time to restart. Once running, subsequent interactions are fast and responsive.
+
 Live Links:
 
 Frontend and Backend (full project): https://briefly-global.vercel.app 
@@ -14,8 +17,24 @@ Backend API: https://brieflyglobal.onrender.com
 
 API Documentation: https://brieflyglobal.onrender.com/docs
 
-Important Note for Recruiters:
-When using the Vercel live demo, please allow up to 3-7 minutes on the first load. The backend is hosted on Render’s free tier and spins down when idle. Because the backend includes heavy machine learning dependencies, it takes extra time to restart. Once running, subsequent interactions are fast and responsive.
+Live Demo Walkthrough
+
+Step 1: Interactive Map
+Visit briefly-global.vercel.app
+ and select a country to see its data dashboard. This is an interactive map and you can click whichever country you choose.
+
+Step 2: Explore Global Coverage
+Check major countries (USA, France, Japan, Brazil) to view consistent economic and news insights.
+
+Step 3: News Intelligence
+Scroll to the news section for AI-powered sentiment, bias, and credibility scoring.
+
+Step 4: Country Comparison
+Use the comparison tool to analyze two countries side by side.
+
+Step 5 (Optional): API Docs
+Explore API Docs
+ for technical details.
 
 Key Features
 
@@ -61,28 +80,9 @@ ExchangeRate API – currency data
 
 Custom AI pipeline – NLTK + custom ML models
 
-Live Demo Walkthrough
-
-Step 1: Interactive Map
-Visit briefly-global.vercel.app
- and select a country to see its data dashboard.
-
-Step 2: Explore Global Coverage
-Check major countries (USA, France, Japan, Brazil) to view consistent economic and news insights.
-
-Step 3: News Intelligence
-Scroll to the news section for AI-powered sentiment, bias, and credibility scoring.
-
-Step 4: Country Comparison
-Use the comparison tool to analyze two countries side by side.
-
-Step 5 (Optional): API Docs
-Explore API Docs
- for technical details.
-
 Local Setup
 
-Requirements: Node.js 18+, Python 3.11+, Git
+Requirements: Node.js 18+, Python 3.11+, Git, you will also need your own api keys for the .env file
 
 Clone the repository
 

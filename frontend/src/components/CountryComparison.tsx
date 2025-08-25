@@ -28,40 +28,44 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
   const formatPercent = (num: number): string => `${num.toFixed(1)}%`;
 
   const getComparisonColor = (value1: number, value2: number, higherIsBetter: boolean = true) => {
-    if (value1 === value2) return '#94a3b8'; // neutral
+    if (value1 === value2) return '#9ca3af'; // neutral gray
     const isFirst = higherIsBetter ? value1 > value2 : value1 < value2;
     return isFirst ? '#22c55e' : '#ef4444'; // green if better, red if worse
   };
 
+  const SectionCard: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+    <div style={{
+      background: '#1e1e1e',
+      borderRadius: '8px',
+      padding: '15px',
+      margin: '12px 0',
+      border: '1px solid #2c2c2c'
+    }}>
+      <div style={{ 
+        fontSize: '14px', 
+        fontWeight: 600, 
+        marginBottom: '12px',
+        textAlign: 'center',
+        color: '#e5e5e5',
+        letterSpacing: '0.5px'
+      }}>
+        {title}
+      </div>
+      {children}
+    </div>
+  );
+
   const ComparisonMetric: React.FC<{
     label: string;
-    icon: string;
     value1: number | undefined;
     value2: number | undefined;
     formatter: (num: number) => string;
     higherIsBetter?: boolean;
-    unit?: string;
-  }> = ({ label, icon, value1, value2, formatter, higherIsBetter = true, unit = '' }) => {
+  }> = ({ label, value1, value2, formatter, higherIsBetter = true }) => {
     if (!value1 || !value2) return null;
 
     return (
-      <div style={{
-        background: 'rgba(255,255,255,0.05)',
-        borderRadius: '8px',
-        padding: '15px',
-        margin: '10px 0',
-        border: '1px solid rgba(255,255,255,0.1)'
-      }}>
-        <div style={{ 
-          fontSize: '14px', 
-          fontWeight: 'bold', 
-          marginBottom: '10px',
-          textAlign: 'center',
-          color: '#61dafb'
-        }}>
-          {icon} {label}
-        </div>
-        
+      <SectionCard title={label}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {/* Country 1 */}
           <div style={{ 
@@ -69,23 +73,17 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
             flex: 1,
             color: getComparisonColor(value1, value2, higherIsBetter)
           }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
+            <div style={{ fontSize: '18px', fontWeight: 600 }}>
               {formatter(value1)}
             </div>
-            <div style={{ fontSize: '12px', opacity: 0.8 }}>
+            <div style={{ fontSize: '12px', opacity: 0.7 }}>
               {country1Data.country_code}
             </div>
           </div>
 
           {/* VS indicator */}
-          <div style={{ 
-            margin: '0 15px', 
-            fontSize: '12px', 
-            opacity: 0.6,
-            textAlign: 'center'
-          }}>
-            <div>VS</div>
-            {/* Percentage difference */}
+          <div style={{ margin: '0 15px', fontSize: '12px', opacity: 0.6, textAlign: 'center' }}>
+            <div>vs</div>
             <div style={{ fontSize: '10px', marginTop: '2px' }}>
               {value1 && value2 ? `${Math.abs(((value1 - value2) / value2) * 100).toFixed(0)}%` : ''}
             </div>
@@ -97,15 +95,15 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
             flex: 1,
             color: getComparisonColor(value2, value1, higherIsBetter)
           }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
+            <div style={{ fontSize: '18px', fontWeight: 600 }}>
               {formatter(value2)}
             </div>
-            <div style={{ fontSize: '12px', opacity: 0.8 }}>
+            <div style={{ fontSize: '12px', opacity: 0.7 }}>
               {country2Data.country_code}
             </div>
           </div>
         </div>
-      </div>
+      </SectionCard>
     );
   };
 
@@ -128,33 +126,17 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
     const stats2 = getSentimentStats(country2Data.articles);
 
     return (
-      <div style={{
-        background: 'rgba(255,255,255,0.05)',
-        borderRadius: '8px',
-        padding: '15px',
-        margin: '10px 0',
-        border: '1px solid rgba(255,255,255,0.1)'
-      }}>
-        <div style={{ 
-          fontSize: '14px', 
-          fontWeight: 'bold', 
-          marginBottom: '15px',
-          textAlign: 'center',
-          color: '#61dafb'
-        }}>
-          📰 News Sentiment Analysis
-        </div>
-        
+      <SectionCard title="News Sentiment Analysis">
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {/* Country 1 News */}
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
+            <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>
               {country1Data.country_code}
             </div>
             <div style={{ fontSize: '12px' }}>
-              <span style={{ color: '#22c55e' }}>✓ {stats1.positive} Positive</span><br/>
-              <span style={{ color: '#ef4444' }}>✗ {stats1.negative} Negative</span><br/>
-              <span style={{ color: '#94a3b8' }}>○ {stats1.neutral} Neutral</span>
+              <span style={{ color: '#22c55e' }}>{stats1.positive} Positive</span><br/>
+              <span style={{ color: '#ef4444' }}>{stats1.negative} Negative</span><br/>
+              <span style={{ color: '#9ca3af' }}>{stats1.neutral} Neutral</span>
             </div>
             <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '5px' }}>
               {country1Data.articles?.length || 0} total articles
@@ -162,36 +144,33 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
           </div>
 
           <div style={{ margin: '0 15px', fontSize: '12px', opacity: 0.6, alignSelf: 'center' }}>
-            VS
+            vs
           </div>
 
           {/* Country 2 News */}
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
+            <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>
               {country2Data.country_code}
             </div>
             <div style={{ fontSize: '12px' }}>
-              <span style={{ color: '#22c55e' }}>✓ {stats2.positive} Positive</span><br/>
-              <span style={{ color: '#ef4444' }}>✗ {stats2.negative} Negative</span><br/>
-              <span style={{ color: '#94a3b8' }}>○ {stats2.neutral} Neutral</span>
+              <span style={{ color: '#22c55e' }}>{stats2.positive} Positive</span><br/>
+              <span style={{ color: '#ef4444' }}>{stats2.negative} Negative</span><br/>
+              <span style={{ color: '#9ca3af' }}>{stats2.neutral} Neutral</span>
             </div>
             <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '5px' }}>
               {country2Data.articles?.length || 0} total articles
             </div>
           </div>
         </div>
-      </div>
+      </SectionCard>
     );
   };
 
   return (
     <div style={{
       position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0,0,0,0.8)',
+      inset: 0,
+      background: 'rgba(0,0,0,0.85)',
       zIndex: 10000,
       display: 'flex',
       alignItems: 'center',
@@ -199,7 +178,7 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
       padding: '20px'
     }}>
       <div style={{
-        background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+        background: '#121212',
         borderRadius: '12px',
         padding: '30px',
         maxWidth: '800px',
@@ -207,7 +186,7 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
         maxHeight: '90vh',
         overflow: 'auto',
         position: 'relative',
-        border: '2px solid rgba(255,255,255,0.2)'
+        border: '1px solid #2c2c2c'
       }}>
         {/* Header */}
         <div style={{
@@ -218,27 +197,26 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
         }}>
           <h2 style={{ 
             margin: 0, 
-            color: 'white',
-            fontSize: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
+            color: '#f5f5f5',
+            fontSize: '22px',
+            fontWeight: 600,
+            letterSpacing: '0.5px'
           }}>
-            ⚖️ Country Comparison
+            Country Comparison
           </h2>
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.2)',
+              background: '#2c2c2c',
               border: 'none',
               borderRadius: '6px',
-              padding: '8px 12px',
-              color: 'white',
+              padding: '6px 10px',
+              color: '#f5f5f5',
               cursor: 'pointer',
-              fontSize: '14px'
+              fontSize: '13px'
             }}
           >
-            ✕ Close
+            Close
           </button>
         </div>
 
@@ -247,20 +225,21 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           marginBottom: '20px',
-          padding: '15px',
-          background: 'rgba(255,255,255,0.1)',
-          borderRadius: '8px'
+          padding: '12px',
+          background: '#1e1e1e',
+          borderRadius: '8px',
+          border: '1px solid #2c2c2c'
         }}>
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <h3 style={{ margin: 0, color: '#fbbf24', fontSize: '20px' }}>
+            <h3 style={{ margin: 0, color: '#e5e5e5', fontSize: '18px' }}>
               {country1Data.country}
             </h3>
           </div>
-          <div style={{ margin: '0 20px', alignSelf: 'center', fontSize: '18px' }}>
-            🆚
+          <div style={{ margin: '0 20px', alignSelf: 'center', fontSize: '16px', opacity: 0.6 }}>
+            vs
           </div>
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <h3 style={{ margin: 0, color: '#fbbf24', fontSize: '20px' }}>
+            <h3 style={{ margin: 0, color: '#e5e5e5', fontSize: '18px' }}>
               {country2Data.country}
             </h3>
           </div>
@@ -269,7 +248,6 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
         {/* Economic Comparisons */}
         <ComparisonMetric
           label="Gross Domestic Product"
-          icon="💰"
           value1={country1Data.economic_indicators?.GDP?.value}
           value2={country2Data.economic_indicators?.GDP?.value}
           formatter={formatNumber}
@@ -277,7 +255,6 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
 
         <ComparisonMetric
           label="Population"
-          icon="👥"
           value1={country1Data.economic_indicators?.POPULATION?.value}
           value2={country2Data.economic_indicators?.POPULATION?.value}
           formatter={formatPopulation}
@@ -285,7 +262,6 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
 
         <ComparisonMetric
           label="GDP per Capita"
-          icon="💎"
           value1={country1Data.economic_indicators?.GDP_PER_CAPITA?.value}
           value2={country2Data.economic_indicators?.GDP_PER_CAPITA?.value}
           formatter={formatNumber}
@@ -293,7 +269,6 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
 
         <ComparisonMetric
           label="Unemployment Rate"
-          icon="📈"
           value1={country1Data.economic_indicators?.UNEMPLOYMENT?.value}
           value2={country2Data.economic_indicators?.UNEMPLOYMENT?.value}
           formatter={formatPercent}
@@ -302,7 +277,6 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
 
         <ComparisonMetric
           label="Life Expectancy"
-          icon="🏥"
           value1={country1Data.economic_indicators?.LIFE_EXPECTANCY?.value}
           value2={country2Data.economic_indicators?.LIFE_EXPECTANCY?.value}
           formatter={(num) => `${num.toFixed(1)} years`}
@@ -310,7 +284,6 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
 
         <ComparisonMetric
           label="Internet Users"
-          icon="🌐"
           value1={country1Data.economic_indicators?.INTERNET_USERS?.value}
           value2={country2Data.economic_indicators?.INTERNET_USERS?.value}
           formatter={formatPercent}
@@ -320,26 +293,19 @@ const CountryComparison: React.FC<CountryComparisonProps> = ({
         <NewsComparison />
 
         {/* Quick Insights */}
-        <div style={{
-          background: 'rgba(255,255,255,0.1)',
-          borderRadius: '8px',
-          padding: '15px',
-          marginTop: '20px'
-        }}>
-          <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '10px', color: '#61dafb' }}>
-            🧠 Quick Insights
-          </div>
-          <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+        <SectionCard title="Quick Insights">
+          <div style={{ fontSize: '12px', lineHeight: 1.6, color: '#d1d5db' }}>
             • <strong>Economic size:</strong> {country1Data.country} GDP is {country1Data.economic_indicators?.GDP?.value && country2Data.economic_indicators?.GDP?.value ? 
               `${((country1Data.economic_indicators.GDP.value / country2Data.economic_indicators.GDP.value) * 100).toFixed(0)}%` : 'unknown'} of {country2Data.country}'s<br/>
             • <strong>Population:</strong> {country1Data.country} has {country1Data.economic_indicators?.POPULATION?.value && country2Data.economic_indicators?.POPULATION?.value ?
               `${((country1Data.economic_indicators.POPULATION.value / country2Data.economic_indicators.POPULATION.value) * 100).toFixed(0)}%` : 'unknown'} the population of {country2Data.country}<br/>
             • <strong>News sentiment:</strong> Recent coverage differs between countries
           </div>
-        </div>
+        </SectionCard>
       </div>
     </div>
   );
 };
 
 export default CountryComparison;
+

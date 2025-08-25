@@ -83,12 +83,12 @@ const App: React.FC = () => {
         
         if (response.ok) {
           setAvailableCountries(data.countries || data);
-          console.log(`✅ Loaded ${data.countries?.length || data.length} countries from backend`);
+          console.log(`Loaded ${data.countries?.length || data.length} countries from backend`);
         } else {
           throw new Error(data.detail || 'Failed to fetch countries');
         }
       } catch (err) {
-        console.error('❌ Failed to load countries:', err);
+        console.error('Failed to load countries:', err);
         // Fallback to original 5 countries if backend fails
         setAvailableCountries([
           { code: 'USA', name: 'United States', coords: [-95.7129, 37.0902] },
@@ -107,7 +107,7 @@ const App: React.FC = () => {
   }, []);
 
   const fetchCountryData = async (countryCode: string) => {
-    console.log('🔍 Fetching comprehensive data for:', countryCode);
+    console.log('Fetching comprehensive data for:', countryCode);
     
     setLoading(true);
     setError(null);
@@ -153,7 +153,7 @@ const App: React.FC = () => {
       });
       
       const loadTime = Date.now() - startTime;
-      console.log(`⏱️ Total load time: ${loadTime}ms`);
+      console.log(`Total load time: ${loadTime}ms`);
       
       if (response.ok) {
         const data = await response.json();
@@ -163,7 +163,7 @@ const App: React.FC = () => {
         
         // Log performance for debugging
         if (loadTime > 60000) {
-          console.warn(`🐌 Slow load detected: ${loadTime}ms for ${countryCode}`);
+          console.warn(`Slow load detected: ${loadTime}ms for ${countryCode}`);
         }
       } else {
         setError(`Server error: ${response.status} ${response.statusText}`);
@@ -175,7 +175,7 @@ const App: React.FC = () => {
       } else {
         setError('Failed to connect to backend');
       }
-      console.error('❌ Fetch error:', err);
+      console.error('Fetch error:', err);
     } finally {
       clearTimeout(coldStartTimer);
       clearInterval(progressTimer);
@@ -197,7 +197,7 @@ const App: React.FC = () => {
         setComparisonData(data);
       }
     } catch (err) {
-      console.error('❌ Comparison fetch error:', err);
+      console.error('Comparison fetch error:', err);
     } finally {
       setLoadingComparison(false);
     }
@@ -206,7 +206,7 @@ const App: React.FC = () => {
   const handleStartComparison = async () => {
     if (!countryData) return;
     
-    console.log('🆚 Starting comparison:', selectedCountry, 'vs', comparisonCountry);
+    console.log('Starting comparison:', selectedCountry, 'vs', comparisonCountry);
     await fetchComparisonData(comparisonCountry);
     setShowComparison(true);
   };
@@ -219,182 +219,232 @@ const App: React.FC = () => {
   }, [availableCountries, loadingCountries]);
 
   const handleCountryClick = (countryCode: string) => {
-    console.log('🎯 Country selected:', countryCode);
+    console.log('Country selected:', countryCode);
     setSelectedCountry(countryCode);
     fetchCountryData(countryCode);
   };
 
-  const getSentimentColor = (label: string) => {
-    switch (label) {
-      case 'positive': return '#4ade80';
-      case 'negative': return '#f87171';
-      default: return '#94a3b8';
+  const COLORS = {
+    positive: "#2e7d32", // dark green
+    negative: "#c62828", // dark red
+    neutral: "#757575",  // medium gray
+  };
+  
+  // Bias color function
+  const getBiasColor = (bias: string) => {
+    switch (bias.toLowerCase()) {
+      case "left":
+        return COLORS.negative;
+      case "right":
+        return COLORS.positive;
+      case "center":
+      default:
+        return COLORS.neutral;
     }
   };
-
-  const getBiasColor = (label: string) => {
-    switch (label) {
-      case 'neutral': return '#10b981';
-      case 'liberal': return '#3b82f6';
-      case 'conservative': return '#ef4444';
-      default: return '#6b7280';
+  
+  // Sentiment color function
+  const getSentimentColor = (sentiment: string) => {
+    switch (sentiment.toLowerCase()) {
+      case "positive":
+        return COLORS.positive;
+      case "negative":
+        return COLORS.negative;
+      case "neutral":
+      default:
+        return COLORS.neutral;
     }
   };
+  
 
   const ColdStartLoadingComponent = () => (
-    <div style={{ 
-      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)', 
-      padding: '30px', 
-      borderRadius: '15px',
-      margin: '20px 0',
-      maxWidth: '800px',
-      textAlign: 'center',
-      border: '1px solid rgba(59, 130, 246, 0.3)',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      {/* Animated background */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-        animation: 'shimmer 2s infinite',
-        transform: 'translateX(-100%)'
-      }} />
-      
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ fontSize: '24px', marginBottom: '15px' }}>
-          🔄 Loading {selectedCountry} Intelligence
+    <div
+      style={{
+        background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.2) 100%)",
+        padding: "30px",
+        borderRadius: "12px",
+        margin: "20px 0",
+        maxWidth: "800px",
+        textAlign: "center",
+        border: "1px solid rgba(255,255,255,0.1)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Subtle animated shimmer effect */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background:
+            "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
+          animation: "shimmer 2s infinite",
+          transform: "translateX(-100%)",
+        }}
+      />
+  
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ fontSize: "20px", marginBottom: "15px", fontWeight: 500 }}>
+          Loading {selectedCountry} Intelligence
         </div>
-        
-        <div style={{ fontSize: '16px', marginBottom: '20px', color: '#60a5fa' }}>
+  
+        <div style={{ fontSize: "15px", marginBottom: "20px", color: "#aaa" }}>
           {loadingStage}
         </div>
-        
+  
         {/* Progress Bar */}
-        <div style={{
-          width: '100%',
-          height: '8px',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          borderRadius: '4px',
-          marginBottom: '20px',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            width: `${loadingProgress}%`,
-            height: '100%',
-            backgroundColor: '#60a5fa',
-            borderRadius: '4px',
-            transition: 'width 0.5s ease'
-          }} />
+        <div
+          style={{
+            width: "100%",
+            height: "8px",
+            backgroundColor: "rgba(255,255,255,0.05)",
+            borderRadius: "4px",
+            marginBottom: "20px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              width: `${loadingProgress}%`,
+              height: "100%",
+              backgroundColor: "#2e7d32", // dark green for progress
+              borderRadius: "4px",
+              transition: "width 0.5s ease",
+            }}
+          />
         </div>
-        
+  
         {showColdStartWarning ? (
-          <div style={{
-            background: 'rgba(251, 191, 36, 0.2)',
-            padding: '20px',
-            borderRadius: '10px',
-            border: '1px solid rgba(251, 191, 36, 0.4)'
-          }}>
-            <div style={{ fontSize: '18px', marginBottom: '10px', color: '#fbbf24' }}>
-              ☕ Server is Starting Up
+          <div
+            style={{
+              background: "rgba(117, 117, 117, 0.15)",
+              padding: "20px",
+              borderRadius: "10px",
+              border: "1px solid rgba(117, 117, 117, 0.3)",
+              textAlign: "left",
+            }}
+          >
+            {/* Pulsing server text */}
+            <div
+              style={{
+                fontSize: "16px",
+                marginBottom: "10px",
+                color: "#c62828",
+                animation: "pulse 2s infinite",
+              }}
+            >
+              Server is Waking Up
             </div>
-            <div style={{ fontSize: '14px', lineHeight: '1.6', marginBottom: '15px' }}>
-              <strong>For Resume Reviewers:</strong> This app uses free hosting that "sleeps" after inactivity. 
-              The first request takes 3-7 minutes to wake up, then it's lightning fast!
+  
+            <div style={{ fontSize: "14px", lineHeight: "1.6", marginBottom: "15px", color: "#ccc" }}>
+              <strong>For Recruiters:</strong> The backend is hosted on free tier infrastructure.  
+              The first request may take <strong>3–7 minutes</strong> to spin up due to heavy ML dependencies.  
+              After that, responses are fast and seamless.
             </div>
-            <div style={{ fontSize: '13px', opacity: 0.8 }}>
-              💡 <strong>Tech Note:</strong> In production, this would use always-on hosting for instant responses.
-              This delay demonstrates the full-stack architecture working across distributed services.
-            </div>
-            
-            {/* Fun loading messages */}
-            <div style={{ 
-              fontSize: '12px', 
-              marginTop: '15px', 
-              opacity: 0.7,
-              fontStyle: 'italic' 
-            }}>
-              {loadingProgress < 30 && "🚀 Booting up FastAPI server..."}
-              {loadingProgress >= 30 && loadingProgress < 60 && "📊 Loading World Bank APIs..."}
-              {loadingProgress >= 60 && loadingProgress < 90 && "📰 Fetching news data..."}
-              {loadingProgress >= 90 && "🎯 Almost ready!"}
+  
+            <div style={{ fontSize: "13px", opacity: 0.8, color: "#999" }}>
+              <strong>Tech Note:</strong> In production, we’d use dedicated hosting for instant cold starts.  
+              This delay is purely a limitation of free-tier hosting.
             </div>
           </div>
         ) : (
-          <div style={{ fontSize: '13px', opacity: 0.7 }}>
-            Fetching news, economic indicators, and currency data
+          <div style={{ fontSize: "13px", opacity: 0.7, color: "#999" }}>
+            Fetching data sources (economic indicators, news, market data)
           </div>
         )}
       </div>
+  
+      {/* CSS animations */}
+      <style>
+        {`
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+          }
+        `}
+      </style>
     </div>
   );
+  
+  
 
   // Get popular countries for comparison dropdown
   const popularCountries = availableCountries.slice(0, 20);
 
-  return (    
-    <div className="App">
-      <header className="App-header">
-      {loading && <ColdStartLoadingComponent />}
-        <h1>🌍 World Intelligence Platform</h1>
-        <p>Comprehensive Country Analysis with Real-Time Data</p>
+  return (
+    <div className="App" style={{ backgroundColor: '#0f111a', color: '#e5e7eb', minHeight: '100vh', padding: '20px' }}>
+      <header className="App-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        
+        {loading && <ColdStartLoadingComponent />}
+  
+        <h1 style={{ fontSize: '28px', marginBottom: '10px' }}>World Intelligence Platform</h1>
+        <p style={{ fontSize: '16px', marginBottom: '20px', color: '#9ca3af' }}>
+          Comprehensive Country Analysis with Real-Time Data
+        </p>
+  
         {/* Loading Countries State */}
         {loadingCountries && (
-          <div style={{ 
-            background: 'rgba(59, 130, 246, 0.1)', 
-            padding: '15px', 
+          <div style={{
+            background: 'rgba(255,255,255,0.05)',
+            padding: '15px',
             borderRadius: '10px',
             margin: '20px 0',
             maxWidth: '800px',
-            textAlign: 'center'
+            textAlign: 'center',
           }}>
-            <div style={{ fontSize: '16px', marginBottom: '8px' }}>
-              🔄 Loading world countries...
+            <div style={{ fontSize: '16px', marginBottom: '8px', color: '#f59e0b' }}>
+              Loading world countries...
             </div>
-            <div style={{ fontSize: '12px', opacity: 0.7 }}>
+            <div style={{ fontSize: '12px', opacity: 0.7, color: '#9ca3af' }}>
               Fetching complete country database from backend
             </div>
           </div>
         )}
-        
+  
         {/* Interactive Map */}
         {!loadingCountries && (
-          <div style={{ 
-            background: 'rgba(255,255,255,0.1)', 
-            padding: '20px', 
+          <div style={{
+            background: 'rgba(255,255,255,0.05)',
+            padding: '20px',
             borderRadius: '10px',
             margin: '20px 0',
             maxWidth: '900px',
-            width: '100%'
+            width: '100%',
           }}>
-            <h3>🗺️ Interactive World Map</h3>
-            <p>Click any country to view comprehensive intelligence report (100+ countries available)</p>
-            
+            <h3 style={{ marginBottom: '10px' }}>Interactive World Map</h3>
+            <p style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '15px' }}>
+              Click any country to view comprehensive intelligence report
+            </p>
+  
             <RealWorldMap 
               onCountryClick={handleCountryClick}
               selectedCountry={selectedCountry}
             />
-            
-            <div style={{ 
+  
+            <div style={{
               marginTop: '15px',
               fontSize: '14px',
               opacity: 0.8,
-              textAlign: 'center'
+              textAlign: 'center',
+              color: '#9ca3af'
             }}>
-              Selected: {availableCountries.find(c => c.code === selectedCountry)?.name || selectedCountry} | 
-              {loading && ' 🔄 Loading comprehensive data...'} |
-              {countryData && countryData.data_availability && (
+              Selected: {availableCountries.find(c => c.code === selectedCountry)?.name || selectedCountry} |
+              {loading && ' Loading comprehensive data...'} |
+              {countryData?.data_availability && (
                 ` Available: ${Object.entries(countryData.data_availability)
                   .filter(([_, available]) => available)
-                  .map(([type, _]) => type)
+                  .map(([type]) => type)
                   .join(', ')}`
               )}
             </div>
-
+  
             {/* Comparison Controls */}
             {countryData && (
               <div style={{
@@ -408,14 +458,14 @@ const App: React.FC = () => {
                 gap: '15px',
                 flexWrap: 'wrap'
               }}>
-                <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
-                  ⚖️ Compare Countries:
+                <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#a3e635' }}>
+                  Compare Countries:
                 </span>
                 
-                <span style={{ fontSize: '14px' }}>
+                <span style={{ fontSize: '14px', color: '#e5e7eb' }}>
                   {countryData.country} vs
                 </span>
-
+  
                 <select
                   value={comparisonCountry}
                   onChange={(e) => setComparisonCountry(e.target.value)}
@@ -423,13 +473,13 @@ const App: React.FC = () => {
                     padding: '6px 10px',
                     borderRadius: '4px',
                     border: 'none',
-                    background: 'rgba(255,255,255,0.9)',
+                    background: 'rgba(255,255,255,0.1)',
+                    color: '#e5e7eb',
                     fontSize: '14px',
                     maxWidth: '200px'
                   }}
                 >
-                  {popularCountries
-                    .filter(c => c.code !== selectedCountry)
+                  {popularCountries.filter(c => c.code !== selectedCountry)
                     .map(country => (
                       <option key={country.code} value={country.code}>
                         {country.name}
@@ -437,197 +487,155 @@ const App: React.FC = () => {
                     ))
                   }
                 </select>
-
+  
                 <button
                   onClick={handleStartComparison}
                   disabled={loadingComparison}
                   style={{
                     padding: '8px 15px',
                     fontSize: '14px',
-                    backgroundColor: '#f59e0b',
-                    color: 'white',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    color: '#a3e635',
                     border: 'none',
                     borderRadius: '6px',
                     cursor: loadingComparison ? 'not-allowed' : 'pointer',
                     fontWeight: 'bold'
                   }}
                 >
-                  {loadingComparison ? '🔄 Loading...' : '🆚 Compare'}
+                  {loadingComparison ? 'Loading...' : 'Compare'}
                 </button>
               </div>
             )}
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && (
-          <div style={{ 
-            background: 'rgba(97, 218, 251, 0.1)', 
-            padding: '20px', 
-            borderRadius: '10px',
-            margin: '20px 0',
-            maxWidth: '800px',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '16px', marginBottom: '10px' }}>
-              🔄 Loading comprehensive intelligence for {selectedCountry}...
-            </div>
-            <div style={{ fontSize: '12px', opacity: 0.7 }}>
-              Fetching news, economic indicators, currency data, and country metrics
-            </div>
-          </div>
-        )}
-
         {/* Error State */}
         {error && (
           <div style={{ 
-            background: 'rgba(255, 107, 107, 0.1)', 
+            background: 'rgba(198, 57, 57, 0.1)', 
             padding: '20px', 
             borderRadius: '10px',
             margin: '20px 0',
             color: '#ff6b6b',
             maxWidth: '800px'
           }}>
-            ❌ Error: {error}
+            Error: {error}
           </div>
         )}
-
-        {/* Data Availability Notice */}
-        {countryData && countryData.message && (
-          <div style={{ 
-            background: 'rgba(59, 130, 246, 0.1)', 
-            padding: '15px', 
-            borderRadius: '10px',
-            margin: '20px 0',
-            maxWidth: '800px',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '14px', marginBottom: '8px' }}>
-              ℹ️ Data Availability Notice
-            </div>
-            <div style={{ fontSize: '12px', opacity: 0.8 }}>
-              {countryData.message}
-            </div>
-          </div>
-        )}
-
+  
         {/* Country Dashboard */}
         {countryData && (
           <div style={{ maxWidth: '900px', width: '100%' }}>
             <CountryDashboard countryData={countryData} />
+            
           </div>
         )}
-
-        {/* News Analysis Results */}
-        {countryData && countryData.articles && countryData.articles.length > 0 && (
-          <div style={{ 
-            background: 'rgba(255,255,255,0.1)', 
-            padding: '20px', 
-            borderRadius: '10px',
-            margin: '20px 0',
-            maxWidth: '900px',
-            width: '100%',
-            textAlign: 'left'
-          }}>
-            <h4>📰 Latest News & AI Analysis</h4>
-            <p>Recent articles from {countryData.country} with sentiment and bias analysis</p>
-            
-            {countryData.articles.map((article, index) => (
-              <div key={index} style={{ 
-                background: 'rgba(255,255,255,0.05)', 
-                padding: '15px', 
+  
+        {/* News Articles */}
+        {countryData && Array.isArray(countryData.articles) && countryData.articles.length > 0 && (
+            <div style={{
+              background: 'rgba(255,255,255,0.05)',
+              padding: '20px',
+              borderRadius: '10px',
+              margin: '20px 0',
+              maxWidth: '900px',
+              width: '100%',
+              textAlign: 'left',
+            }}>
+            <h4 style={{ marginBottom: '10px' }}>Latest News & AI Analysis</h4>
+            <p style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '15px' }}>
+              Recent articles with sentiment and bias analysis
+            </p>
+  
+            {countryData?.articles?.map((article, index) => (
+              <div key={index} style={{
+                background: 'rgba(255,255,255,0.03)',
+                padding: '15px',
                 borderRadius: '8px',
                 margin: '15px 0',
                 border: '1px solid rgba(255,255,255,0.1)'
               }}>
-                <h5 style={{ margin: '0 0 10px 0', color: '#61dafb' }}>
+                <h5 style={{ margin: '0 0 10px 0', color: '#a3e635' }}>
                   {article.title}
                 </h5>
-                
-                <div style={{ fontSize: '14px', opacity: 0.8, marginBottom: '10px' }}>
-                  📰 {article.source} • 📅 {new Date(article.published_at).toLocaleDateString()}
+  
+                <div style={{ fontSize: '14px', opacity: 0.8, marginBottom: '10px', color: '#9ca3af' }}>
+                  {article.source} • {new Date(article.published_at).toLocaleDateString()}
                 </div>
-
+  
                 <div style={{ fontSize: '14px', marginBottom: '10px', opacity: 0.9 }}>
                   {article.description}
                 </div>
-                
+  
                 {article.ai_analysis && (
                   <div style={{ margin: '10px 0' }}>
-                    <div style={{ marginBottom: '8px' }}>
-                      <strong>🤖 AI Summary:</strong> {article.ai_analysis.summary_tweet}
+                    <div style={{ marginBottom: '8px', color: '#e5e7eb' }}>
+                      <strong>AI Summary:</strong> {article.ai_analysis.summary_tweet}
                     </div>
-                    
+  
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                      <span style={{ 
-                        padding: '4px 8px', 
-                        borderRadius: '4px', 
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
                         backgroundColor: getSentimentColor(article.ai_analysis.sentiment.label),
                         color: 'white',
                         fontSize: '12px'
                       }}>
-                        😊 {article.ai_analysis.sentiment.label}
+                        {article.ai_analysis.sentiment.label}
                       </span>
-                      
-                      <span style={{ 
-                        padding: '4px 8px', 
-                        borderRadius: '4px', 
+  
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
                         backgroundColor: getBiasColor(article.ai_analysis.bias.label),
                         color: 'white',
                         fontSize: '12px'
                       }}>
-                        ⚖️ {article.ai_analysis.bias.label}
+                        {article.ai_analysis.bias.label}
                       </span>
-                      
-                      <span style={{ 
-                        padding: '4px 8px', 
-                        borderRadius: '4px', 
-                        backgroundColor: '#6366f1',
+  
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        backgroundColor: '#6b7280',
                         color: 'white',
                         fontSize: '12px'
                       }}>
-                        🔒 {Math.round((article.ai_analysis.bias.credibility || 0) * 100)}% credible
+                        {Math.round((article.ai_analysis.bias.credibility || 0) * 100)}% credible
                       </span>
                     </div>
                   </div>
                 )}
-                
-                <a href={article.url} target="_blank" rel="noopener noreferrer" 
-                   style={{ color: '#61dafb', fontSize: '14px' }}>
+  
+                <a href={article.url} target="_blank" rel="noopener noreferrer"
+                   style={{ color: '#a3e635', fontSize: '14px' }}>
                   Read Full Article →
                 </a>
               </div>
             ))}
           </div>
         )}
-
-        {/* No News Available Message */}
-        {countryData && countryData.articles && countryData.articles.length === 0 && (
-          <div style={{ 
-            background: 'rgba(156, 163, 175, 0.1)', 
-            padding: '20px', 
+  
+        {/* No News Message */}
+        {countryData?.articles?.length === 0 && (
+          <div style={{
+            background: 'rgba(156, 163, 175, 0.1)',
+            padding: '20px',
             borderRadius: '10px',
             margin: '20px 0',
             maxWidth: '800px',
-            textAlign: 'center'
+            textAlign: 'center',
+            color: '#9ca3af'
           }}>
             <div style={{ fontSize: '16px', marginBottom: '10px' }}>
-              📰 No Recent News Available
+              No Recent News Available
             </div>
             <div style={{ fontSize: '14px', opacity: 0.8 }}>
-              No recent news articles found for {countryData.country}. This could be due to:
-            </div>
-            <ul style={{ fontSize: '13px', opacity: 0.7, textAlign: 'left', marginTop: '10px' }}>
-              <li>Limited English-language news coverage</li>
-              <li>API rate limiting or availability</li>
-              <li>Recent events not yet indexed</li>
-            </ul>
-            <div style={{ fontSize: '12px', opacity: 0.6, marginTop: '10px' }}>
-              Economic and currency data may still be available above
+              No articles found for {countryData.country}.
             </div>
           </div>
         )}
-
+  
         {/* Comparison Modal */}
         {showComparison && countryData && comparisonData && (
           <CountryComparison
@@ -636,11 +644,11 @@ const App: React.FC = () => {
             onClose={() => setShowComparison(false)}
           />
         )}
-        <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7 }}>
-          Backend API: <a href={`${API_BASE_URL}/docs`} target="_blank" rel="noopener noreferrer">
+  
+        <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7, color: '#9ca3af' }}>
+          Backend API: <a href={`${API_BASE_URL}/docs`} target="_blank" rel="noopener noreferrer" style={{ color: '#a3e635' }}>
             {API_BASE_URL}/docs
-          </a> | 
-          Countries loaded: {availableCountries.length}
+          </a> | Countries loaded: {availableCountries.length}
         </p>
       </header>
     </div>

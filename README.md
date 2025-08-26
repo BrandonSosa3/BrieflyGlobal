@@ -7,7 +7,7 @@ Project Overview
 BrieflyGlobal aggregates and analyzes global data from multiple sources and presents it through an intuitive, interactive interface. It combines modern frontend and backend technologies with AI-powered analysis to deliver insights into world affairs.
 
 Important Note for Users:
-When using the Vercel live demo, please allow up to 3-7 minutes on the first load. The backend is hosted on Render’s free tier and spins down when idle. Because the backend includes heavy machine learning dependencies, it takes extra time to restart. Once running, subsequent interactions are fast and responsive.
+When using the Vercel live demo, please allow up to 3-7 minutes on the first load. The backend is hosted on Render’s free tier and spins down when idle. Because the backend includes heavy machine learning dependencies, it takes extra time to restart. Once running, subsequent interactions are fast and responsive. PLEASE also keep your searches to a minimum or just 1-2 as we are using free version of NewsApi which only alots a small number of requests to the api for article retrieval per month and per day.
 
 Live Links:
 

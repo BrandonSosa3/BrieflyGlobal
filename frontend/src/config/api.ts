@@ -9,7 +9,7 @@ const getApiUrl = (): string => {
   }
   
   // If deployed (production) - use your actual Render backend URL
-  return 'https://brieflyglobal.onrender.com';
+  return 'https://brieflyglobal-1.onrender.com';
 };
 
 const API_BASE_URL = getApiUrl();

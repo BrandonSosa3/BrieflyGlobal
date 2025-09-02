@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ .
 
 # Make the startup script executable
-RUN chmod +x railway_start.py
+RUN chmod +x start.py
 
 # Use our custom startup script
 CMD ["python", "start.py"]

@@ -21,9 +21,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the backend code
 COPY backend/ .
 
-# Informational port
-EXPOSE 8000
-
-# Use Python to handle PORT variable properly
-CMD ["python", "start.py"]
-
+# Debug: Show all environment variables
+CMD ["sh", "-c", "echo '=== ALL ENV VARS ===' && printenv && echo '=== PORT SPECIFIC ===' && echo PORT is: [$PORT] && uvicorn app.main:app --host 0.0.0.0 --port 8000"]

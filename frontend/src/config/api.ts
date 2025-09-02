@@ -11,7 +11,7 @@ const getApiUrl = (): string => {
   }
   
   // If deployed (production) - use actual Render backend URL
-  return 'https://brieflyglobal-1.onrender.com';
+  return 'https://brieflyglobal-api-production.up.railway.app';
 };
 
 // this calls the above function and stores it

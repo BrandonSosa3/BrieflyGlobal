@@ -4,40 +4,54 @@ import sys
 import uvicorn
 
 def main():
-    # Print debug info
     print("=== RAILWAY STARTUP DEBUG ===")
     print(f"Python version: {sys.version}")
     print(f"Current working directory: {os.getcwd()}")
+    print(f"Files in current directory: {os.listdir('.')}")
     
-    # Check all environment variables with 'PORT' in them
-    port_vars = {k: v for k, v in os.environ.items() if 'PORT' in k.upper()}
-    print(f"Port-related environment variables: {port_vars}")
-    
-    # Try to determine the port
-    port = 8000  # Default
-    
-    # Check various possible port variables
-    port_sources = ['PORT', 'RAILWAY_TCP_PROXY_PORT', 'SERVER_PORT']
-    for port_var in port_sources:
-        if port_var in os.environ:
-            try:
-                port = int(os.environ[port_var])
-                print(f"Using port {port} from environment variable {port_var}")
-                break
-            except (ValueError, TypeError):
-                print(f"Invalid port value in {port_var}: {os.environ[port_var]}")
+    # Check if app directory exists
+    if os.path.exists('app'):
+        print(f"Files in app directory: {os.listdir('app')}")
     else:
-        print(f"No valid port found in environment, using default: {port}")
+        print("No 'app' directory found!")
     
-    print(f"Starting FastAPI server on 0.0.0.0:{port}")
-    print("=== END DEBUG ===")
+    # Try to import your app to see what fails
+    print("\n=== TESTING IMPORT ===")
+    try:
+        from app.main import app
+        print("✅ Successfully imported app.main:app")
+    except ImportError as e:
+        print(f"❌ Import error: {e}")
+        print("Trying alternative imports...")
+        
+        # Try different import paths
+        try:
+            import app.main
+            print("✅ Can import app.main module")
+        except ImportError as e2:
+            print(f"❌ Can't import app.main: {e2}")
+        
+        try:
+            import main
+            print("✅ Can import main module directly")
+        except ImportError as e3:
+            print(f"❌ Can't import main directly: {e3}")
+    
+    except Exception as e:
+        print(f"❌ Other error importing app: {e}")
+    
+    # Check Python path
+    print(f"\nPython path: {sys.path}")
+    
+    port = int(os.environ.get("PORT", 8000))
+    print(f"\nStarting server on port {port}")
     
     # Start the server
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
         port=port,
-        log_level="info"
+        log_level="debug"
     )
 
 if __name__ == "__main__":

@@ -24,6 +24,6 @@ COPY backend/ .
 # Informational port
 EXPOSE 8000
 
-# Use dynamic PORT environment variable (works for Railway, Render, etc.)
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Use Python to handle PORT variable properly
+CMD ["python", "start.py"]
 

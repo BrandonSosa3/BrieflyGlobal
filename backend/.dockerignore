@@ -1,15 +1,25 @@
-venv/
-.env
+venv
+__pycache__
 *.pyc
-__pycache__/
 *.pyo
 *.pyd
-
-# Git stuff
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
 .git
-.gitignore
-
-# OS / IDE files
+.mypy_cache
+.pytest_cache
+.hypothesis
+.env
+.env.local
 .DS_Store
-.vscode
-.idea
+*.sqlite3

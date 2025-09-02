@@ -2,5 +2,8 @@
     "build": {
       "builder": "dockerfile",
       "dockerfilePath": "backend/Dockerfile"
+    },
+    "deploy": {
+      "healthcheckPath": "/api/v1/news/status"
     }
   }

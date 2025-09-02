@@ -1,11 +1,13 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
 
+
+# By inheriting from BaseSettings now any attributes inside can be overriden by environment vars instead of hardcoding them
 class Settings(BaseSettings):
-    # Database
+    # Database connection string
     database_url: str = "postgresql://worldmap_user:worldmap_pass@localhost:5432/worldmap_db"
     
-    # Redis
+    # Redis connection URL
     redis_url: str = "redis://localhost:6379"
     
     # Security
@@ -46,7 +48,11 @@ class Settings(BaseSettings):
     enable_advanced_bias_detection: bool = False
     enable_multi_language_support: bool = False
     
+    # tells pydantic to look for a .env in project root, anything in .env will override defaults above
     class Config:
         env_file = ".env"
 
+# creates an instance of the class to be used in other files. this loads all settings into an object
+# example: from config import settings
+# print(settings.database_url)  prints from .env if set, else default
 settings = Settings()

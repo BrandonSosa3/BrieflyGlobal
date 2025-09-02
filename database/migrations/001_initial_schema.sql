@@ -1,3 +1,5 @@
+-- Here we are creating db tables in SQL since SQLAlchemy was not advanced or specific enough for these migrations
+-- migrations are changes, updates, additions, subtractions from the database
 -- Countries table
 CREATE TABLE countries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -23,6 +25,7 @@ CREATE TABLE countries (
 -- News articles table
 CREATE TABLE news_articles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    -- each news article is linked to a country via UUID
     country_id UUID REFERENCES countries(id),
     title TEXT NOT NULL,
     content TEXT,
@@ -37,12 +40,14 @@ CREATE TABLE news_articles (
     emotional_tone DECIMAL(3,2),
     impact_score DECIMAL(3,2),
     embedding VECTOR(1536),
+    -- storing timestamps for when article was published and scraped for analysis
     published_at TIMESTAMP WITH TIME ZONE,
     scraped_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Economic indicators table
+
 CREATE TABLE economic_indicators (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     country_id UUID REFERENCES countries(id),
@@ -53,6 +58,7 @@ CREATE TABLE economic_indicators (
     date DATE NOT NULL,
     source VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    -- ensures you cant insert duplicate indicators for the same country on the same date
     UNIQUE(country_id, indicator_type, date)
 );
 
@@ -72,6 +78,9 @@ CREATE TABLE events (
 );
 
 -- Create indexes for performance
+-- Indexes in SQL speed up queries
+-- Speeds up queries like: SELECT * FROM countries WHERE iso_code = 'USA';
+-- without an index it looks at every country which is slow, with this it immediately goes to USA
 CREATE INDEX idx_countries_iso_code ON countries(iso_code);
 CREATE INDEX idx_news_articles_country_id ON news_articles(country_id);
 CREATE INDEX idx_news_articles_published_at ON news_articles(published_at DESC);
@@ -79,4 +88,5 @@ CREATE INDEX idx_economic_indicators_country_date ON economic_indicators(country
 CREATE INDEX idx_events_country_date ON events(country_id, event_date DESC);
 
 -- Vector similarity search index
+-- specialized index for AI similarity searches, not normal SQL queries.
 CREATE INDEX ON news_articles USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);

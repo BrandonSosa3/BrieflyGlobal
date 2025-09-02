@@ -1,8 +1,20 @@
+// useState allows the component to have state variables
+// useEffect 
+// useCallback → memoizes functions so they don’t get recreated on every render (optimization).
+// Map is the maplibre component that renders the interactive map
+// ViewState TypeScript type defining the map’s camera (longitude, latitude, zoom, bearing, pitch). 
 import React, { useState, useCallback, useEffect } from 'react';
 import Map, { ViewState } from 'react-map-gl/maplibre';
+// default maplibre styles
 import 'maplibre-gl/dist/maplibre-gl.css';
+// this is our object containing backend URLs, e.g., for fetching country data.
 import { API_ENDPOINTS } from '../config/api';
 
+// Typescript interface
+// In TypeScript, an interface is a way to define the shape of an object. It tells TypeScript:
+// What properties an object should have
+// What types those properties are
+// Which properties are optional
 interface RealWorldMapProps {
   onCountryClick: (countryCode: string) => void;
   selectedCountry?: string;

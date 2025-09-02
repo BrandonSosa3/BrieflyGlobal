@@ -1,3 +1,4 @@
+/* global styles, loads once and applies to whole app */
 * {
   box-sizing: border-box;
 }

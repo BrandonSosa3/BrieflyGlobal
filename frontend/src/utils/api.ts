@@ -1,3 +1,6 @@
+// Remember fetch() → JavaScript function to make an HTTP request.
+// This file defines a generic API client class that wraps around fetch and makes calling your backend easier and cleaner. 
+// Instead of writing raw fetch() calls everywhere in your React components, you can centralize the logic for GET and POST requests here.
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export class ApiClient {

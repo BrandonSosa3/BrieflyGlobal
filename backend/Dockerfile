@@ -22,8 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ .
 
 # Informational port
-EXPOSE $PORT
+EXPOSE 8000
 
-# Use Render's dynamic PORT environment variable
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port $PORT"]
+# Use dynamic PORT environment variable (works for Railway, Render, etc.)
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
 

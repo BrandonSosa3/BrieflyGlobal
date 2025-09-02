@@ -12,17 +12,17 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only requirements first (Docker cache optimization)
-COPY requirements.txt .
+COPY backend/requirements.txt .
 
 # Install Python packages
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the backend code
-COPY . .
+COPY backend/ .
 
 # Informational port
-EXPOSE 10000
+EXPOSE $PORT
 
 # Use Render's dynamic PORT environment variable
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port $PORT"]

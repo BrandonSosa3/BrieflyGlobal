@@ -21,8 +21,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the backend code
 COPY backend/ .
 
-# Informational port
-EXPOSE 8000
+# Make the startup script executable
+RUN chmod +x railway_start.py
 
-# Use Python to handle PORT properly
-CMD ["python", "-c", "import os; import uvicorn; port=int(os.environ.get('PORT', 8000)); print(f'Starting on port {port}'); uvicorn.run('app.main:app', host='0.0.0.0', port=port)"]
+# Use our custom startup script
+CMD ["python", "start.py"]
